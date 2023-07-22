@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:work_time_tracker/hours.dart';
 import 'package:work_time_tracker/settings.dart';
 
 void main() {
@@ -40,55 +41,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-    Icon(Icons.call, size: 150,),
-    Icon(Icons.abc, size: 150,),
-    SettingsPage(title: "Ustawienia"),
+    CurrentHoursPage(),
+    Icon(Icons.abc, size: 150),
+    SettingsPage(),
   ];
-
-  void _incrementCounter() {
-  }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: _pages.elementAt(_selectedIndex),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.timer), label: "Godziny"),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Estymacja"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Ustawienia"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer),
+            label: "Godziny",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: "Estymacja",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Ustawienia",
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: (value) => setState(() {
           _selectedIndex = value;
         }),
       ),
+      body: _pages.elementAt(_selectedIndex),
     );
   }
 }
