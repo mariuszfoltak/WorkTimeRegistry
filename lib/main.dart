@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_time_tracker/hours.dart';
-import 'package:work_time_tracker/settings.dart';
+import 'package:work_time_tracker/settings/settings.dart';
 
 void main() {
   runApp(const MyApp());

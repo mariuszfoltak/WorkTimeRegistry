@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:work_time_tracker/settings/settings.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class SettingsRootPage extends StatelessWidget {
+  const SettingsRootPage({super.key});
 
-  @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +16,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: Icon(Icons.person),
             title: Text("Klienci"),
-            onTap: () => print("test"),
+            onTap: () => Navigator.pushNamed(context, Routes.clients),
           ),
         ],
       ),
