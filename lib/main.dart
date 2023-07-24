@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:work_time_tracker/hours.dart';
+import 'package:work_time_tracker/registered_hours/hours.dart';
+import 'package:work_time_tracker/repository/dbrepository.dart';
 import 'package:work_time_tracker/settings/settings.dart';
 
 void main() {
@@ -44,10 +45,20 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-    CurrentHoursPage(),
+    RegisteredHoursPage(),
     Icon(Icons.abc, size: 150),
     SettingsPage(),
   ];
+
+  @override
+  void initState() {
+    initDb();
+    super.initState();
+  }
+
+  void initDb() async {
+    await DatabaseRepository.instance.database;
+  }
 
   @override
   Widget build(BuildContext context) {
