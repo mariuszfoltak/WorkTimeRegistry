@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:work_time_tracker/registered_hours/hours.dart';
+import 'package:work_time_tracker/registered_hours/hours_screen.dart';
+import 'package:work_time_tracker/registered_hours/registered_hours_screen.dart';
 import 'package:work_time_tracker/repository/dbrepository.dart';
 import 'package:work_time_tracker/settings/settings.dart';
 
@@ -45,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
-    RegisteredHoursPage(),
+    HoursPage(),
     Icon(Icons.abc, size: 150),
     SettingsPage(),
   ];

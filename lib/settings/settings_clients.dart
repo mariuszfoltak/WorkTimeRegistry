@@ -19,7 +19,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
   }
 
   void getClients() async {
-    await DatabaseRepository.instance.getAllClients().then((value) {
+    await DatabaseRepository.instance.getAllProjects().then((value) {
       setState(() {
         clients = value;
       });

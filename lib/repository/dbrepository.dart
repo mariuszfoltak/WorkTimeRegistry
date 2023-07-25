@@ -61,7 +61,7 @@ create table ${AppConst.registeredHoursTableName} (
     }
   }
 
-  Future<List<ClientModel>> getAllClients() async {
+  Future<List<ClientModel>> getAllProjects() async {
     final db = await instance.database;
 
     final result = await db.query(AppConst.projectsTableName);
@@ -71,7 +71,7 @@ create table ${AppConst.registeredHoursTableName} (
   Future<List<RegisteredHourModel>> getAllRegisteredHours() async {
     final db = await instance.database;
 
-    final clients = await getAllClients();
+    final clients = await getAllProjects();
     final result = await db.query(AppConst.registeredHoursTableName, orderBy: "date DESC");
     return result.map((json) {
       var hour = RegisteredHourModel.fromJson(json);
