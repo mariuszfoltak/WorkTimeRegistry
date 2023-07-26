@@ -15,7 +15,7 @@ class HoursPage extends StatefulWidget {
 }
 
 class _HoursPageState extends State<HoursPage> {
-  var key = GlobalKey();
+  var key = GlobalKey<NavigatorState>();
   Map<String, WidgetBuilder> _routeBuilders(BuildContext context) {
     return {
       Routes.root: (context) => const RegisteredHoursPage(),
@@ -27,11 +27,20 @@ class _HoursPageState extends State<HoursPage> {
   Widget build(BuildContext context) {
     var routeBuilders = _routeBuilders(context);
 
-    return Navigator(
-      key: key,
-      initialRoute: Routes.root,
-      onGenerateRoute: (routeSettings) => MaterialPageRoute(
-        builder: (context) => routeBuilders[routeSettings.name]!(context),
+    return WillPopScope(
+      onWillPop: () {
+        if(key.currentState != null && key.currentState!.canPop()) {
+          key.currentState!.pop();
+          return Future(() => false);
+        }
+        return Future(() => true);
+      },
+      child: Navigator(
+        key: key,
+        initialRoute: Routes.root,
+        onGenerateRoute: (routeSettings) => MaterialPageRoute(
+          builder: (context) => routeBuilders[routeSettings.name]!(context),
+        ),
       ),
     );
   }
