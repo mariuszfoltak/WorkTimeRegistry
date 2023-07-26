@@ -6,6 +6,11 @@ import 'package:work_time_tracker/model/client.dart';
 import '../model/registered_hour.dart';
 import '../repository/dbrepository.dart';
 
+// TODO: add saving description
+// TODO: sort projects by last used date
+// TODO: put projects fields in ListTile or something
+// TODO: format date field with locales
+
 class RegisterHoursScreen extends StatefulWidget {
   const RegisterHoursScreen({super.key});
 
@@ -46,7 +51,7 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                       DatabaseRepository.instance.insertHours(hour: registeredHour);
                     }
                   }
-                  Navigator.pop(context);
+                  Navigator.pop(context, true);
                 });
               },
             ),

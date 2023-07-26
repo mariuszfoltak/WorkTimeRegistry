@@ -61,6 +61,15 @@ create table ${AppConst.registeredHoursTableName} (
     }
   }
 
+  Future<void> deleteHours({required RegisteredHourModel hour}) async {
+    try {
+      final db = await database;
+      db.delete(AppConst.registeredHoursTableName, where: 'id = ?', whereArgs: [hour.id]);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   Future<List<ClientModel>> getAllProjects() async {
     final db = await instance.database;
 
