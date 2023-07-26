@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
-import 'package:work_time_tracker/registered_hours/registered_hours_screen.dart';
 import 'package:work_time_tracker/repository/dbrepository.dart';
 import 'package:work_time_tracker/settings/settings.dart';
 
@@ -20,21 +20,20 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Work Time Tracker'),
+      supportedLocales: const [
+        Locale('en', 'EN'),
+        Locale('pl', 'PL'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:intl/intl.dart';
 import 'package:work_time_tracker/model/registered_hour.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
 import 'package:work_time_tracker/repository/dbrepository.dart';
@@ -27,10 +28,15 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
                 elements: snapshot.data!,
                 groupBy: (element) => element.date,
                 order: GroupedListOrder.DESC,
-                groupSeparatorBuilder: (String groupByValue) => Padding(
+                groupSeparatorBuilder: (String groupByValue) {
+                  var date = DateTime.parse(groupByValue);
+                  String locale = Localizations.localeOf(context).languageCode;
+                  var separatorValue = DateFormat('yyyy-MM-dd (EEEE)', locale).format(date);
+                  return Padding(
                   padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: Text(groupByValue, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
+                  child: Text(separatorValue, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                );
+                },
                 itemBuilder: (context, element) {
                   var hourModel = element;
                   return ListTile(

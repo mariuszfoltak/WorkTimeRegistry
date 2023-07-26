@@ -1,3 +1,4 @@
+import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:work_time_tracker/model/client.dart';
@@ -14,6 +15,7 @@ class RegisterHoursScreen extends StatefulWidget {
 
 class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
   Map<ClientModel, TextEditingController> projectHoursTextControllers = {};
+  var selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +25,32 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
         title: const Text("Zarejestruj godziny"),
       ),
       bottomSheet: Container(
-        child: MaterialButton(
-          color: Colors.green,
-          textColor: Colors.white,
-          child: const Text('Zapisz'),
-          onPressed: () {
-            setState(() {
-              for (var project in projectHoursTextControllers.keys) {
-                if (projectHoursTextControllers[project]!.value.text.isNotEmpty) {
-                  var hours = int.parse(projectHoursTextControllers[project]!.value.text);
-                  String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
-                  var registeredHour = RegisteredHourModel(projectId: project.id!, hours: hours, date: date);
-                  DatabaseRepository.instance.insertHours(hour: registeredHour);
-                }
-              }
-              Navigator.pop(context);
-            });
-          },
+        height: 50,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            MaterialButton(
+              focusNode: FocusNode(skipTraversal: true),
+              height: 50,
+              minWidth: double.infinity,
+              color: Colors.green,
+              textColor: Colors.white,
+              child: const Text('Zapisz'),
+              onPressed: () {
+                setState(() {
+                  for (var project in projectHoursTextControllers.keys) {
+                    if (projectHoursTextControllers[project]!.value.text.isNotEmpty) {
+                      var hours = int.parse(projectHoursTextControllers[project]!.value.text);
+                      String date = DateFormat('yyyy-MM-dd').format(selectedDate);
+                      var registeredHour = RegisteredHourModel(projectId: project.id!, hours: hours, date: date);
+                      DatabaseRepository.instance.insertHours(hour: registeredHour);
+                    }
+                  }
+                  Navigator.pop(context);
+                });
+              },
+            ),
+          ],
         ),
       ),
       body: FutureBuilder<List<ClientModel>>(
@@ -47,28 +58,67 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             projectHoursTextControllers = {};
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                var project = snapshot.data![index];
-                var textEditingController = TextEditingController();
-                projectHoursTextControllers.putIfAbsent(project, () => textEditingController);
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(project.name, style: const TextStyle(fontSize: 24)),
-                    Container(
-                      width: 50,
-                      margin: const EdgeInsets.only(right: 5),
-                      child: TextField(
-                        controller: textEditingController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(border: OutlineInputBorder()),
+            return Column(
+              children: [
+                SizedBox(
+                    width: 300,
+                    child: DateTimeField(
+                      decoration: const InputDecoration(
+                        suffixIcon: Icon(Icons.event_note),
+                        labelText: 'Data',
                       ),
-                    ),
-                  ],
-                );
-              },
+                      dateFormat: DateFormat("yyyy-MM-dd (EEEE)"),
+                      mode: DateTimeFieldPickerMode.date,
+                      selectedDate: selectedDate,
+                      onDateSelected: (DateTime value) {
+                        setState(() {
+                          selectedDate = value;
+                        });
+                      },
+                    )
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 64),
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      var project = snapshot.data![index];
+                      var textEditingController = TextEditingController();
+                      projectHoursTextControllers.putIfAbsent(project, () => textEditingController);
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(project.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Text(project.name, style: const TextStyle(fontSize: 24)),
+                                Container(
+                                  width: 70,
+                                  margin: const EdgeInsets.only(right: 5),
+                                  child: TextField(
+                                    autofocus: index == 0,
+                                    textInputAction: TextInputAction.next,
+                                    controller: textEditingController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(labelText: "Godziny"),
+                                  ),
+                                ),
+                                const Expanded(child: TextField(
+                                  textInputAction: TextInputAction.next,
+                                  decoration: InputDecoration(labelText: "Opcjonalny opis"),
+                                )),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           } else {
             // TODO: co wyświetlać w trakcie ładowania? co wyświetlać kiedy brak projektów?
