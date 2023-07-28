@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
-import 'package:work_time_tracker/model/registered_hour.dart';
+import 'package:work_time_tracker/main.dart';
+import 'package:work_time_tracker/model/registered_hours.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
-import 'package:work_time_tracker/repository/dbrepository.dart';
 
 // TODO: add updating entries
 // TODO: add colors to projects
@@ -25,13 +25,13 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Godziny"),
       ),
-      body: FutureBuilder<List<RegisteredHourModel>>(
-          future: DatabaseRepository.instance.getAllRegisteredHours(),
+      body: StreamBuilder<List<RegisteredHourWithProject>>(
+          stream: database.watchRegisteredHours(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return GroupedListView<RegisteredHourModel, String>(
+              return GroupedListView<RegisteredHourWithProject, String>(
                 elements: snapshot.data!,
-                groupBy: (element) => element.date,
+                groupBy: (element) => element.registeredHour.date,
                 order: GroupedListOrder.DESC,
                 groupSeparatorBuilder: (String groupByValue) {
                   var date = DateTime.parse(groupByValue);
@@ -43,7 +43,8 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
                   );
                 },
                 itemBuilder: (context, element) {
-                  var hourModel = element;
+                  var registeredHour = element.registeredHour;
+                  var project = element.project;
                   return Slidable(
                     endActionPane: ActionPane(
                       motion: const ScrollMotion(),
@@ -51,10 +52,10 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
                       children: [
                         SlidableAction(
                           onPressed: (context) async {
-                            await DatabaseRepository.instance.deleteHours(hour: hourModel);
+                            await database.deleteRegisteredHour(registeredHour);
                             setState(() {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Usunięto wpis dla projektu ${hourModel.client!.name}')),
+                                SnackBar(content: Text('Usunięto wpis dla projektu ${project.name}')),
                               );
                             });
                           },
@@ -67,9 +68,9 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
                     ),
                     child: Container(
                       child: ListTile(
-                        title: Text(hourModel.client!.name),
-                        // subtitle: Text(hourModel.date),
-                        trailing: CircleAvatar(child: Text("${hourModel.hours}h")),
+                        title: Text(project.name),
+                        subtitle: (registeredHour.description != null && registeredHour.description != '') ? Text(registeredHour.description!) : null, // FIXME
+                        trailing: CircleAvatar(child: Text("${registeredHour.hours}h")),
                       ),
                     ),
                   );

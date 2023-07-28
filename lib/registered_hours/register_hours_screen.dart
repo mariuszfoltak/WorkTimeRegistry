@@ -1,10 +1,9 @@
 import 'package:date_field/date_field.dart';
+import 'package:drift/drift.dart' as d;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:work_time_tracker/model/client.dart';
-
-import '../model/registered_hour.dart';
-import '../repository/dbrepository.dart';
+import 'package:work_time_tracker/main.dart';
+import 'package:work_time_tracker/model/registered_hours.dart';
 
 // TODO: add saving description
 // TODO: sort projects by last used date
@@ -19,7 +18,9 @@ class RegisterHoursScreen extends StatefulWidget {
 }
 
 class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
-  Map<ClientModel, TextEditingController> projectHoursTextControllers = {};
+  static const _HOURS = "hours";
+  static const _DESCRIPTION = "description";
+  Map<Project, Map<String, TextEditingController>> projectHoursTextControllers = {};
   var selectedDate = DateTime.now();
 
   @override
@@ -42,24 +43,28 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
               textColor: Colors.white,
               child: const Text('Zapisz'),
               onPressed: () {
-                setState(() {
-                  for (var project in projectHoursTextControllers.keys) {
-                    if (projectHoursTextControllers[project]!.value.text.isNotEmpty) {
-                      var hours = int.parse(projectHoursTextControllers[project]!.value.text);
-                      String date = DateFormat('yyyy-MM-dd').format(selectedDate);
-                      var registeredHour = RegisteredHourModel(projectId: project.id!, hours: hours, date: date);
-                      DatabaseRepository.instance.insertHours(hour: registeredHour);
-                    }
+                List<RegisteredHoursCompanion> entries = [];
+                for (var project in projectHoursTextControllers.keys) {
+                  if (projectHoursTextControllers[project]![_HOURS]!.value.text.isNotEmpty) {
+                    var hours = int.parse(projectHoursTextControllers[project]![_HOURS]!.value.text);
+                    var description = projectHoursTextControllers[project]![_DESCRIPTION]!.value.text;
+                    String date = DateFormat('yyyy-MM-dd').format(selectedDate);
+                    entries.add(RegisteredHoursCompanion.insert(
+                      project: project.id,
+                      hours: hours,
+                      date: date,
+                      description: d.Value(description),
+                    ));
                   }
-                  Navigator.pop(context, true);
-                });
+                }
+                database.addRegisteredHours(entries).then((value) => Navigator.pop(context, true));
               },
             ),
           ],
         ),
       ),
-      body: FutureBuilder<List<ClientModel>>(
-        future: DatabaseRepository.instance.getAllProjects(),
+      body: FutureBuilder<List<Project>>(
+        future: database.allProjects,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             projectHoursTextControllers = {};
@@ -80,22 +85,30 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                           selectedDate = value;
                         });
                       },
-                    )
-                ),
+                    )),
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 64),
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       var project = snapshot.data![index];
-                      var textEditingController = TextEditingController();
-                      projectHoursTextControllers.putIfAbsent(project, () => textEditingController);
+                      var hoursController = TextEditingController();
+                      var descriptionController = TextEditingController();
+                      projectHoursTextControllers.putIfAbsent(
+                          project,
+                          () => {
+                                _HOURS: hoursController,
+                                _DESCRIPTION: descriptionController,
+                              });
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(project.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                            Text(
+                              project.name,
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -106,15 +119,18 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                                   child: TextField(
                                     autofocus: index == 0,
                                     textInputAction: TextInputAction.next,
-                                    controller: textEditingController,
+                                    controller: hoursController,
                                     keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(labelText: "Godziny"),
                                   ),
                                 ),
-                                const Expanded(child: TextField(
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(labelText: "Opcjonalny opis"),
-                                )),
+                                Expanded(
+                                  child: TextField(
+                                    textInputAction: TextInputAction.next,
+                                    controller: descriptionController,
+                                    decoration: const InputDecoration(labelText: "Opcjonalny opis"),
+                                  ),
+                                ),
                               ],
                             ),
                           ],

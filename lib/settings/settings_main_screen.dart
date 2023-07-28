@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:work_time_tracker/settings/settings.dart';
 
-class SettingsRootPage extends StatelessWidget {
-  const SettingsRootPage({super.key});
+class SettingsMainScreen extends StatefulWidget {
+  const SettingsMainScreen({super.key});
 
+  @override
+  State<SettingsMainScreen> createState() => _SettingsMainScreenState();
+}
+
+class _SettingsMainScreenState extends State<SettingsMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:work_time_tracker/model/client.dart';
-import 'package:work_time_tracker/repository/dbrepository.dart';
+import 'package:work_time_tracker/main.dart';
+import 'package:work_time_tracker/model/registered_hours.dart';
 
 class SettingsClientsPage extends StatefulWidget {
   const SettingsClientsPage({super.key});
@@ -10,35 +10,23 @@ class SettingsClientsPage extends StatefulWidget {
 }
 
 class _SettingsClientsPageState extends State<SettingsClientsPage> {
-  final TextEditingController _textFieldController = TextEditingController();
-  List<ClientModel> clients = [];
+  TextEditingController _textFieldController = TextEditingController();
 
   void addClient() async {
-    ClientModel client = ClientModel(name: _textFieldController.text);
-    await DatabaseRepository.instance.insert(client: client);
-  }
-
-  void getClients() async {
-    await DatabaseRepository.instance.getAllProjects().then((value) {
-      setState(() {
-        clients = value;
-      });
-    }).catchError((e) => debugPrint(e.toString()));
+    var project = ProjectsCompanion.insert(name: _textFieldController.text, color: Colors.white.value);
+    await database.into(database.projects).insert(project);
   }
 
   String? valueText;
   Future<void> _displayTextInputDialog(BuildContext context) async {
+    _textFieldController = TextEditingController();
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text('Dodaj nowego klienta'),
             content: TextField(
-              onChanged: (value) {
-                setState(() {
-                  valueText = value;
-                });
-              },
+              autofocus: true,
               controller: _textFieldController,
             ),
             actions: <Widget>[
@@ -70,26 +58,33 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
 
   @override
   Widget build(BuildContext context) {
-    getClients();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("Klienci"),
       ),
-      body: ListView.separated(
-        separatorBuilder: (context, index) => const SizedBox(
-          height: 20,
-        ),
-        // padding: EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          final client = clients[index];
-          return ListTile(
-            leading: Icon(Icons.person),
-            title: Text(client.name),
-            onTap: () => print(client.name),
-          );
-        },
-        itemCount: clients.length,
+      body: StreamBuilder<List<Project>>(
+        stream: database.watchProjects(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            var projects = snapshot.data!;
+            return ListView.separated(
+              separatorBuilder: (context, index) =>
+              const SizedBox(height: 20),
+              // padding: EdgeInsets.all(16),
+              itemBuilder: (context, index) {
+                final project = projects[index];
+                return ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text(project.name),
+                  onTap: () => print(project.name),
+                );
+              },
+              itemCount: projects.length,
+            );
+          }
+          return const Text("waiting");
+        }
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayTextInputDialog(context),

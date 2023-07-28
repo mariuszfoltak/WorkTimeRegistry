@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:work_time_tracker/model/registered_hours.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
-import 'package:work_time_tracker/repository/dbrepository.dart';
 import 'package:work_time_tracker/settings/settings.dart';
+
+WTTDatabase database = WTTDatabase();
 
 void main() {
   runApp(const MyApp());
@@ -47,17 +49,12 @@ class _MyHomePageState extends State<MyHomePage> {
   static const List<Widget> _pages = <Widget>[
     HoursPage(),
     Icon(Icons.abc, size: 150),
-    SettingsPage(),
+    SettingsScreen(),
   ];
 
   @override
   void initState() {
-    initDb();
     super.initState();
-  }
-
-  void initDb() async {
-    await DatabaseRepository.instance.database;
   }
 
   @override
