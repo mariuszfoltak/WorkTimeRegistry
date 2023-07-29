@@ -3,7 +3,7 @@ import 'package:drift/drift.dart' as d;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:work_time_tracker/main.dart';
-import 'package:work_time_tracker/model/registered_hours.dart';
+import 'package:work_time_tracker/model/database.dart';
 
 // TODO: add saving description
 // TODO: sort projects by last used date

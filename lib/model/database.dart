@@ -5,7 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-part 'registered_hours.g.dart';
+part 'database.g.dart';
 
 class RegisteredHours extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -54,10 +54,30 @@ class WTTDatabase extends _$WTTDatabase {
 
   Future<List<Project>> get allProjects => (select(projects)..orderBy([(t) => OrderingTerm(expression: t.name)])).get();
 
-  Stream<List<Project>> watchProjects() => (select(projects)..orderBy([(t) => OrderingTerm(expression: t.name)])).watch();
+  Stream<List<Project>> watchProjects() {
+    return (select(projects)
+          ..where((tbl) => tbl.isDeleted.equals(false))
+          ..orderBy([(t) => OrderingTerm(expression: t.name)]))
+        .watch();
+  }
 
   Future<Project> addProject(ProjectsCompanion entry) {
     return into(projects).insertReturning(entry);
+  }
+
+  Future<dynamic> removeProject(Project project) async {
+    var hoursCount = await (selectOnly(registeredHours)
+          ..addColumns([registeredHours.id.count()])
+          ..where(registeredHours.project.equals(project.id)))
+        .map((p0) => p0.read(registeredHours.id.count()))
+        .getSingle();
+
+    if (hoursCount != null && hoursCount > 0) {
+      var disabledProject = project.copyWith(isDeleted: true);
+      return update(projects).replace(disabledProject);
+    }
+
+    return (delete(projects)..where((tbl) => tbl.id.equals(project.id))).go();
   }
 
   Future<int> addRegisteredHour(RegisteredHoursCompanion entry) {
@@ -68,8 +88,7 @@ class WTTDatabase extends _$WTTDatabase {
     await batch((batch) => batch.insertAll(registeredHours, entries));
   }
 
-
-  Future<int> deleteRegisteredHour(RegisteredHour entry) {
+  Future<int> removeRegisteredHour(RegisteredHour entry) {
     return (delete(registeredHours)..where((rh) => rh.id.equals(entry.id))).go();
   }
 

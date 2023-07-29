@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'registered_hours.dart';
+part of 'database.dart';
 
 // ignore_for_file: type=lint
 class $ProjectsTable extends Projects with TableInfo<$ProjectsTable, Project> {

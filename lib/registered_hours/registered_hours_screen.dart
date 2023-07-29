@@ -3,7 +3,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:work_time_tracker/main.dart';
-import 'package:work_time_tracker/model/registered_hours.dart';
+import 'package:work_time_tracker/model/database.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
 
 // TODO: add updating entries
@@ -52,7 +52,7 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
                       children: [
                         SlidableAction(
                           onPressed: (context) async {
-                            await database.deleteRegisteredHour(registeredHour);
+                            await database.removeRegisteredHour(registeredHour);
                             setState(() {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Usunięto wpis dla projektu ${project.name}')),

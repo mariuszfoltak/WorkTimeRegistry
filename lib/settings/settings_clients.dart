@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:work_time_tracker/main.dart';
-import 'package:work_time_tracker/model/registered_hours.dart';
+import 'package:work_time_tracker/model/database.dart';
 
 class SettingsClientsPage extends StatefulWidget {
   const SettingsClientsPage({super.key});
@@ -18,6 +19,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
   }
 
   String? valueText;
+
   Future<void> _displayTextInputDialog(BuildContext context) async {
     _textFieldController = TextEditingController();
     return showDialog(
@@ -64,28 +66,47 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
         title: Text("Klienci"),
       ),
       body: StreamBuilder<List<Project>>(
-        stream: database.watchProjects(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            var projects = snapshot.data!;
-            return ListView.separated(
-              separatorBuilder: (context, index) =>
-              const SizedBox(height: 20),
-              // padding: EdgeInsets.all(16),
-              itemBuilder: (context, index) {
-                final project = projects[index];
-                return ListTile(
-                  leading: const Icon(Icons.person),
-                  title: Text(project.name),
-                  onTap: () => print(project.name),
-                );
-              },
-              itemCount: projects.length,
-            );
-          }
-          return const Text("waiting");
-        }
-      ),
+          stream: database.watchProjects(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              var projects = snapshot.data!;
+              return ListView.separated(
+                separatorBuilder: (context, index) => const SizedBox(height: 20),
+                // padding: EdgeInsets.all(16),
+                itemBuilder: (context, index) {
+                  final project = projects[index];
+                  return Slidable(
+                    endActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      extentRatio: 0.25,
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) async {
+                            await database.removeProject(project).then((value) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Usunięto projekt ${project.name}')),
+                              );
+                            });
+                          },
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        )
+                      ],
+                    ),
+                    child: ListTile(
+                      leading: const Icon(Icons.person),
+                      title: Text(project.name),
+                      onTap: () => print(project.name),
+                    ),
+                  );
+                },
+                itemCount: projects.length,
+              );
+            }
+            return const Text("waiting");
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayTextInputDialog(context),
         tooltip: 'Dodaj klienta',

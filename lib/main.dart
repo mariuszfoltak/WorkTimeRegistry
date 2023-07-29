@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:work_time_tracker/model/registered_hours.dart';
+import 'package:work_time_tracker/model/database.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
 import 'package:work_time_tracker/settings/settings.dart';
 
