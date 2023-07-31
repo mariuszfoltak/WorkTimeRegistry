@@ -36,6 +36,13 @@ class RegisteredHourWithProject {
   final Project project;
 }
 
+class ProjectWithAggregateHours {
+  ProjectWithAggregateHours(this.project, this.hours);
+
+  final Project project;
+  final int hours;
+}
+
 @DriftDatabase(tables: [Projects, RegisteredHours])
 class WTTDatabase extends _$WTTDatabase {
   WTTDatabase() : super(_openConnection());
@@ -92,7 +99,7 @@ class WTTDatabase extends _$WTTDatabase {
     return (delete(registeredHours)..where((rh) => rh.id.equals(entry.id))).go();
   }
 
-  Stream<List<RegisteredHourWithProject>> watchRegisteredHours() {
+  Stream<List<RegisteredHourWithProject>> watchRegisteredHours([String? month]) {
     var query = select(registeredHours).join([innerJoin(projects, projects.id.equalsExp(registeredHours.project))]);
     query.orderBy([OrderingTerm.desc(registeredHours.date)]);
     return query.watch().map((rows) {
@@ -103,6 +110,21 @@ class WTTDatabase extends _$WTTDatabase {
         );
       }).toList();
     });
+  }
+
+  Stream<List<ProjectWithAggregateHours>> watchProjectWithAggregateHoursInMonth(String month) {
+    var aggregateHours = registeredHours.hours.sum();
+    var query = select(projects).addColumns([aggregateHours]).join(
+        [innerJoin(registeredHours, projects.id.equalsExp(registeredHours.project))]);
+    query.where(registeredHours.date.like('$month-%'));
+    query.groupBy([projects.id]);
+    query.orderBy([OrderingTerm.desc(projects.name)]);
+    return query.map((row) {
+      return ProjectWithAggregateHours(
+        row.readTable(projects),
+        row.read(aggregateHours)!,
+      );
+    }).watch();
   }
 }
 

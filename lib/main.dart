@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:work_time_tracker/model/database.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
 import 'package:work_time_tracker/settings/settings.dart';
+import 'package:work_time_tracker/statistics/statistic_screen.dart';
 
 WTTDatabase database = WTTDatabase();
 
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         Locale('pl', 'PL'),
       ],
       localizationsDelegates: const [
+        GlobalWidgetsLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
@@ -48,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static const List<Widget> _pages = <Widget>[
     HoursPage(),
-    Icon(Icons.abc, size: 150),
+    StatisticsScreen(),
     SettingsScreen(),
   ];
 
