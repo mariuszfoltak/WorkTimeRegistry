@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:work_time_tracker/main.dart';
 import 'package:work_time_tracker/model/database.dart';
 
@@ -19,6 +20,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   var dateinput = TextEditingController();
   var date = DateTime.now();
 
+  int _workingDaysCount = -1;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -30,6 +33,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     dateinput.text = DateFormat.yMMMM(Localizations.localeOf(context).languageCode).format(date);
     var selectedMonth = DateFormat('yyyy-MM').format(date);
+    if(_workingDaysCount < 0) {
+      DateTime startOfMonth = DateTime(date.year, date.month, 1);
+      _workingDaysCount = calculateWorkingDays(startOfMonth);
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -46,7 +54,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     if (snapshot.hasData) {
                       var data = snapshot.data!;
                       if(data.isNotEmpty) {
-                        var fractionOfMonth = data.map((e) => e.hours).reduce((a, b) => a + b) / 168; // FIXME
+                        var fractionOfMonth = data.map((e) => e.hours).reduce((a, b) => a + b) / (_workingDaysCount*8);
                         double multiplier = _estimate ? fractionOfMonth : 1; // FIXME
                         List<BarChartGroupData> barChartGroupData = createBarChartGroupData(data, multiplier);
                         print('snapshotData ${snapshot.data!.length}');
@@ -106,28 +114,50 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Container(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 17, right: 35),
-                  child: TextField(
-                    controller: dateinput,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.calendar_today), //icon of text field
-                        labelText: "Wybrany miesiąc" //label text of field
-                        ),
-                    readOnly: true, //set it true, so that user will not able to edit text
-                    onTap: () async {
-                      var pickedDate = await showMonthPicker(
-                        context: context,
-                        initialDate: date,
-                      );
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 17),
+                        child: TextField(
+                          controller: dateinput,
+                          decoration: const InputDecoration(
+                              prefixIcon: Icon(Icons.calendar_today), //icon of text field
+                              labelText: "Wybrany miesiąc" //label text of field
+                              ),
+                          readOnly: true, //set it true, so that user will not able to edit text
+                          onTap: () async {
+                            var pickedDate = await showMonthPicker(
+                              context: context,
+                              initialDate: date,
+                            );
 
-                      if (pickedDate != null) {
-                        setState(() {
-                          date = pickedDate;
-                        });
-                      }
-                    },
-                  ),
+                            if (pickedDate != null) {
+                              setState(() {
+                                date = pickedDate;
+                                _workingDaysCount = -1;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: NumberPicker(
+                        value: _workingDaysCount,
+                        minValue: 0,
+                        maxValue: 100,
+                        itemWidth: 50,
+                        axis: Axis.horizontal,
+                        onChanged: (value) => setState(() => _workingDaysCount = value),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.black26),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 CheckboxListTile(
                   title: Text("Estymuj"),
@@ -165,4 +195,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }).toList();
     return barChartGroupData;
   }
+}
+
+int calculateWorkingDays(DateTime start) {
+  int workingDays = 0;
+  for (DateTime date = start; date.month == start.month; date = date.add(Duration(days: 1))) {
+    if (date.weekday >= 1 && date.weekday <= 5) {
+      workingDays++;
+    }
+  }
+  return workingDays;
 }

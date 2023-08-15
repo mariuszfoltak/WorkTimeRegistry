@@ -9,6 +9,7 @@ import 'package:work_time_tracker/model/database.dart';
 // TODO: sort projects by last used date
 // TODO: put projects fields in ListTile or something
 // TODO: format date field with locales
+// TODO: do not clear values after date changed
 
 class RegisterHoursScreen extends StatefulWidget {
   const RegisterHoursScreen({super.key});

@@ -19,9 +19,10 @@ class _SettingsMainScreenState extends State<SettingsMainScreen> {
       body: ListView(
         children: <Widget>[
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text("Klienci"),
-            onTap: () => Navigator.pushNamed(context, Routes.clients),
+            leading: Icon(Icons.assignment),
+            title: Text("Projekty"),
+            trailing: Icon(Icons.navigate_next),
+            onTap: () => Navigator.pushNamed(context, Routes.projects),
           ),
         ],
       ),

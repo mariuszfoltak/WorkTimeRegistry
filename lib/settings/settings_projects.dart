@@ -3,17 +3,17 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:work_time_tracker/main.dart';
 import 'package:work_time_tracker/model/database.dart';
 
-class SettingsClientsPage extends StatefulWidget {
-  const SettingsClientsPage({super.key});
+class SettingsProjectsPage extends StatefulWidget {
+  const SettingsProjectsPage({super.key});
 
   @override
-  State<SettingsClientsPage> createState() => _SettingsClientsPageState();
+  State<SettingsProjectsPage> createState() => _SettingsProjectsPageState();
 }
 
-class _SettingsClientsPageState extends State<SettingsClientsPage> {
+class _SettingsProjectsPageState extends State<SettingsProjectsPage> {
   TextEditingController _textFieldController = TextEditingController();
 
-  void addClient() async {
+  void addProject() async {
     var project = ProjectsCompanion.insert(name: _textFieldController.text, color: Colors.white.value);
     await database.into(database.projects).insert(project);
   }
@@ -26,7 +26,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Dodaj nowego klienta'),
+            title: const Text('Dodaj nowy projekt'),
             content: TextField(
               autofocus: true,
               controller: _textFieldController,
@@ -48,7 +48,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
                 child: const Text('Zapisz'),
                 onPressed: () {
                   setState(() {
-                    addClient();
+                    addProject();
                     Navigator.pop(context);
                   });
                 },
@@ -63,7 +63,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Klienci"),
+        title: Text("Projekty"),
       ),
       body: StreamBuilder<List<Project>>(
           stream: database.watchProjects(),
@@ -96,7 +96,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
                       ],
                     ),
                     child: ListTile(
-                      leading: const Icon(Icons.person),
+                      leading: const Icon(Icons.assignment),
                       title: Text(project.name),
                       onTap: () => print(project.name),
                     ),
@@ -109,7 +109,7 @@ class _SettingsClientsPageState extends State<SettingsClientsPage> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayTextInputDialog(context),
-        tooltip: 'Dodaj klienta',
+        tooltip: 'Dodaj projekt',
         child: const Icon(Icons.add),
       ),
     );

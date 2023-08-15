@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:work_time_tracker/settings/settings_clients.dart';
+import 'package:work_time_tracker/settings/settings_projects.dart';
 import 'package:work_time_tracker/settings/settings_main_screen.dart';
 
 class Routes {
   static const root = "/";
-  static const clients = "/clients";
+  static const projects = "/projects";
 }
 
 class SettingsScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Map<String, WidgetBuilder> _routeBuilders(BuildContext context) {
     return {
       Routes.root: (context) => const SettingsMainScreen(),
-      Routes.clients: (context) => const SettingsClientsPage(),
+      Routes.projects: (context) => const SettingsProjectsPage(),
     };
   }
 
