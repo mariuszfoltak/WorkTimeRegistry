@@ -68,8 +68,15 @@ class WTTDatabase extends _$WTTDatabase {
         .watch();
   }
 
-  Future<Project> addProject(ProjectsCompanion entry) {
-    return into(projects).insertReturning(entry);
+  Future<Project> addProject(ProjectsCompanion entry) async {
+    var project = await (select(projects)..where((tbl) => tbl.name.equals(entry.name.value))).getSingleOrNull();
+    if(project != null) {
+      var updatedProject = project.copyWith(isDeleted: false);
+      await update(projects).replace(updatedProject);
+      return updatedProject;
+    } else {
+      return into(projects).insertReturning(entry);
+    }
   }
 
   Future<dynamic> removeProject(Project project) async {

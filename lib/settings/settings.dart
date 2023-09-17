@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:work_time_tracker/settings/settings_projects.dart';
+import 'package:work_time_tracker/settings/projects/projects_screen.dart';
 import 'package:work_time_tracker/settings/settings_main_screen.dart';
 
 class Routes {
