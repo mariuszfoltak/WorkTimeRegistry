@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/intl_standalone.dart';
 import 'package:work_time_tracker/model/database.dart';
 import 'package:work_time_tracker/registered_hours/hours_screen.dart';
 import 'package:work_time_tracker/settings/settings.dart';
@@ -7,7 +9,8 @@ import 'package:work_time_tracker/statistics/statistic_screen.dart';
 
 WTTDatabase database = WTTDatabase();
 
-void main() {
+void main() async {
+  Intl.systemLocale = await findSystemLocale();
   runApp(const MyApp());
 }
 

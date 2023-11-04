@@ -26,12 +26,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // dateinput.text = DateFormat('yMMMM', Localizations.localeOf(context).languageCode).format(DateTime.now());
   }
 
   @override
   Widget build(BuildContext context) {
-    dateinput.text = DateFormat.yMMMM(Localizations.localeOf(context).languageCode).format(date);
+    dateinput.text = DateFormat.yMMMM().format(date);
     var selectedMonth = DateFormat('yyyy-MM').format(date);
     if(_workingDaysCount < 0) {
       DateTime startOfMonth = DateTime(date.year, date.month, 1);

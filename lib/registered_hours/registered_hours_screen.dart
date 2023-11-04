@@ -8,7 +8,6 @@ import 'package:work_time_tracker/registered_hours/hours_screen.dart';
 
 // TODO: add updating entries
 // TODO: add colors to projects
-// TODO: show description for entry
 
 class RegisteredHoursPage extends StatefulWidget {
   const RegisteredHoursPage({super.key});
@@ -35,8 +34,7 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
                 order: GroupedListOrder.DESC,
                 groupSeparatorBuilder: (String groupByValue) {
                   var date = DateTime.parse(groupByValue);
-                  String locale = Localizations.localeOf(context).languageCode;
-                  var separatorValue = DateFormat('yyyy-MM-dd (EEEE)', locale).format(date);
+                  var separatorValue = DateFormat('yyyy-MM-dd (EEEE)').format(date);
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                     child: Text(separatorValue, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -82,16 +80,7 @@ class _RegisteredHoursPageState extends State<RegisteredHoursPage> {
             }
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var result = await Navigator.pushNamed(context, Routes.registerHours);
-          if(result != null) {
-            setState(() {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Dodano nowe wpisy')),
-              );
-            });
-          }
-        },
+        onPressed: () async => Navigator.pushNamed(context, Routes.registerHours),
         tooltip: 'Dodaj godziny',
         child: const Icon(Icons.add),
       ),

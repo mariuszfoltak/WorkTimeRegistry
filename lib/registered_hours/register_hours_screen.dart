@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:work_time_tracker/main.dart';
 import 'package:work_time_tracker/model/database.dart';
 
-// TODO: add saving description
 // TODO: sort projects by last used date
 // TODO: put projects fields in ListTile or something
-// TODO: format date field with locales
+
+typedef EntryControllers = ({TextEditingController hour, TextEditingController description});
 
 class RegisterHoursScreen extends StatefulWidget {
   const RegisterHoursScreen({super.key});
@@ -18,9 +18,7 @@ class RegisterHoursScreen extends StatefulWidget {
 }
 
 class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
-  static const _HOURS = "hours";
-  static const _DESCRIPTION = "description";
-  Map<Project, Map<String, TextEditingController>> projectHoursTextControllers = {};
+  Map<Project, EntryControllers> projectHoursTextControllers = {};
   var selectedDate = DateTime.now();
 
   @override
@@ -44,11 +42,12 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
               child: const Text('Zapisz'),
               onPressed: () {
                 List<RegisteredHoursCompanion> entries = [];
+                var date = DateFormat('yyyy-MM-dd').format(selectedDate);
                 for (var project in projectHoursTextControllers.keys) {
-                  if (projectHoursTextControllers[project]![_HOURS]!.value.text.isNotEmpty) {
-                    var hours = int.parse(projectHoursTextControllers[project]![_HOURS]!.value.text);
-                    var description = projectHoursTextControllers[project]![_DESCRIPTION]!.value.text;
-                    var date = DateFormat('yyyy-MM-dd').format(selectedDate);
+                  var entryControllers = projectHoursTextControllers[project]!;
+                  if (entryControllers.hour.value.text.isNotEmpty) {
+                    var hours = int.parse(entryControllers.hour.value.text);
+                    var description = entryControllers.description.value.text;
                     entries.add(RegisteredHoursCompanion.insert(
                       project: project.id,
                       hours: hours,
@@ -57,7 +56,12 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                     ));
                   }
                 }
-                database.addRegisteredHours(entries).then((value) => Navigator.pop(context, true));
+                database.addRegisteredHours(entries).then((value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Zarejestrowano godziny na dzień ${date}')),
+                  );
+                  Navigator.pop(context, true);
+                });
               },
             ),
           ],
@@ -91,18 +95,18 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       var project = snapshot.data![index];
-                      var controllersMap = projectHoursTextControllers.putIfAbsent(
-                          project,
-                          () => {
-                                _HOURS: TextEditingController(),
-                                _DESCRIPTION: TextEditingController(),
-                              });
-                      var hoursController = controllersMap[_HOURS]!;
-                      var descriptionController = controllersMap[_DESCRIPTION]!;
+                      var entryControllers = projectHoursTextControllers.putIfAbsent(
+                        project,
+                        () => (
+                          hour: TextEditingController(),
+                          description: TextEditingController(),
+                        ),
+                      );
                       return EntryWidget(
                         project: project,
-                        hoursController: hoursController,
-                        descriptionController: descriptionController,
+                        hoursController: entryControllers.hour,
+                        descriptionController: entryControllers.description,
+                        autofocus: index == 0,
                       );
                     },
                   ),
@@ -125,11 +129,13 @@ class EntryWidget extends StatelessWidget {
     required this.project,
     required this.hoursController,
     required this.descriptionController,
+    required this.autofocus,
   });
 
   final Project project;
   final TextEditingController hoursController;
   final TextEditingController descriptionController;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +156,7 @@ class EntryWidget extends StatelessWidget {
                 width: 70,
                 margin: const EdgeInsets.only(right: 5),
                 child: TextField(
-                  // autofocus: index == 0, // TODO: autofocus
+                  autofocus: autofocus,
                   textInputAction: TextInputAction.next,
                   controller: hoursController,
                   keyboardType: TextInputType.number,
