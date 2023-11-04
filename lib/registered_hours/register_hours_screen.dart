@@ -9,7 +9,6 @@ import 'package:work_time_tracker/model/database.dart';
 // TODO: sort projects by last used date
 // TODO: put projects fields in ListTile or something
 // TODO: format date field with locales
-// TODO: do not clear values after date changed
 
 class RegisterHoursScreen extends StatefulWidget {
   const RegisterHoursScreen({super.key});
@@ -49,7 +48,7 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                   if (projectHoursTextControllers[project]![_HOURS]!.value.text.isNotEmpty) {
                     var hours = int.parse(projectHoursTextControllers[project]![_HOURS]!.value.text);
                     var description = projectHoursTextControllers[project]![_DESCRIPTION]!.value.text;
-                    String date = DateFormat('yyyy-MM-dd').format(selectedDate);
+                    var date = DateFormat('yyyy-MM-dd').format(selectedDate);
                     entries.add(RegisteredHoursCompanion.insert(
                       project: project.id,
                       hours: hours,
@@ -68,7 +67,6 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
         future: database.allProjects,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            projectHoursTextControllers = {};
             return Column(
               children: [
                 SizedBox(
@@ -93,49 +91,18 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       var project = snapshot.data![index];
-                      var hoursController = TextEditingController();
-                      var descriptionController = TextEditingController();
-                      projectHoursTextControllers.putIfAbsent(
+                      var controllersMap = projectHoursTextControllers.putIfAbsent(
                           project,
                           () => {
-                                _HOURS: hoursController,
-                                _DESCRIPTION: descriptionController,
+                                _HOURS: TextEditingController(),
+                                _DESCRIPTION: TextEditingController(),
                               });
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              project.name,
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Text(project.name, style: const TextStyle(fontSize: 24)),
-                                Container(
-                                  width: 70,
-                                  margin: const EdgeInsets.only(right: 5),
-                                  child: TextField(
-                                    autofocus: index == 0,
-                                    textInputAction: TextInputAction.next,
-                                    controller: hoursController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(labelText: "Godziny"),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: TextField(
-                                    textInputAction: TextInputAction.next,
-                                    controller: descriptionController,
-                                    decoration: const InputDecoration(labelText: "Opcjonalny opis"),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      var hoursController = controllersMap[_HOURS]!;
+                      var descriptionController = controllersMap[_DESCRIPTION]!;
+                      return EntryWidget(
+                        project: project,
+                        hoursController: hoursController,
+                        descriptionController: descriptionController,
                       );
                     },
                   ),
@@ -147,6 +114,59 @@ class _RegisterHoursScreenState extends State<RegisterHoursScreen> {
             return const Text("Empty");
           }
         },
+      ),
+    );
+  }
+}
+
+class EntryWidget extends StatelessWidget {
+  const EntryWidget({
+    super.key,
+    required this.project,
+    required this.hoursController,
+    required this.descriptionController,
+  });
+
+  final Project project;
+  final TextEditingController hoursController;
+  final TextEditingController descriptionController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            project.name,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Text(project.name, style: const TextStyle(fontSize: 24)),
+              Container(
+                width: 70,
+                margin: const EdgeInsets.only(right: 5),
+                child: TextField(
+                  // autofocus: index == 0, // TODO: autofocus
+                  textInputAction: TextInputAction.next,
+                  controller: hoursController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Godziny"),
+                ),
+              ),
+              Expanded(
+                child: TextField(
+                  textInputAction: TextInputAction.next,
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: "Opcjonalny opis"),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
